@@ -1,0 +1,19 @@
+name = "LumpedHydroModels"
+uuid = "6c269de5-af4f-4eec-beb6-c1382dcfb534"
+authors = ["Dongdong Kong <kongdd@users.noreply.github.com>"]
+version = "0.1.0"
+
+[deps]
+ModelParams = "213f2e2a-cade-4ae1-a9bc-67b7781bcca8"
+
+[sources]
+ModelParams = {url = "https://github.com/jl-pkgs/ModelParams.jl"}
+
+[compat]
+ModelParams = "0.1.0"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
