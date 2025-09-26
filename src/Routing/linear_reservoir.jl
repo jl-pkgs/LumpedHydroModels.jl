@@ -84,7 +84,27 @@ end
 """
 coef_Pm_linear(t; dt, K, n) = dt / (K * factorial(n - 1)) * pow(t / K, n - 1) * exp(-t / K)
 
+
+function conv_uh(I::AbstractVector, uh::AbstractVector)
+  n = length(uh)
+  ntime = length(I)
+  Q = zeros(ntime)
+
+  for t = 1:ntime
+    for j = n:-1:1
+      # !(1 <= t - j + 1 <= ntime) && continue
+      k = t - j + 1
+      k <= 0 && (k = 1) # 假设I是前期为I[1]
+      Q[t] += I[k] * uh[j]
+    end
+  end
+  return Q
+end
+
+
 export linear_reservoir, linear_reservoir_uh,
   linear_reservoir_low,
   coef_Pm_linear,
   guess_uh
+
+
