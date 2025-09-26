@@ -1,3 +1,6 @@
 Manifest.toml
 *.py
 *.pdf
+
+*.ipynb
+backup
