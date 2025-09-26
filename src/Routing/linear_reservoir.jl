@@ -1,7 +1,10 @@
+linear_Cs2K(CS::Real; dt=1) = dt / 2 * (1 + CS) / (1 - CS)
+linear_K2Cs(K::Real; dt=1) = (2K - dt) / (2K + dt)
+
 # 线性水库汇流：应用于地下水汇流
 # linear_reservoir
 function linear_reservoir_low(I::AbstractVector; CS=NaN, K=1.0, dt=1, nseg::Int=3)
-  isnan(CS) && (CS = (2K - dt) / (2K + dt))
+  isnan(CS) && (CS = linear_K2Cs(K; dt))
 
   n = length(I)
   Q = zeros(n, nseg + 1)
@@ -20,7 +23,6 @@ function linear_reservoir_low(I::AbstractVector; CS=NaN, K=1.0, dt=1, nseg::Int=
   end
   return Q
 end
-
 
 function linear_reservoir(I::AbstractVector; CS=NaN, K=1.0, dt=1, nseg::Int=3)
   isnan(CS) && (CS = (2K - dt) / (2K + dt))
@@ -51,58 +53,4 @@ function linear_reservoir(I::AbstractVector; CS=NaN, K=1.0, dt=1, nseg::Int=3)
 end
 
 
-
-function linear_reservoir_uh(I::AbstractVector; K=1, dt=1, nseg::Int=3, n_uh=30)
-  uh = coef_Pm_linear.(0:n_uh; K, dt, n=nseg)
-  conv_uh(I, uh)
-end
-
-
-function guess_uh(n=10; atol=0.01, maxn=100, fun=coef_Pm_linear, param::NamedTuple)
-  count = 0
-  while true
-    uh = fun.(0:n; param...) # K, dt, n=nseg
-    if 1 - sum(uh) < atol
-      return n, sum(uh), uh
-    end
-    if count >= maxn
-      @warn("Not converge! maxn = $maxn reached!")
-      return n, sum(uh), uh
-    end
-    count += 1
-    n += 1
-  end
-end
-
-
-"""
-线性水库单位线
-
-# References
-1. 沈冰，水文学原理，2008，P171, Eq. 9-105
-> Eq. 9-109, 公式存在bug，`(n-1)`应是`(n-1)!`
-"""
-coef_Pm_linear(t; dt, K, n) = dt / (K * factorial(n - 1)) * pow(t / K, n - 1) * exp(-t / K)
-
-
-function conv_uh(I::AbstractVector, uh::AbstractVector)
-  n = length(uh)
-  ntime = length(I)
-  Q = zeros(ntime)
-
-  for t = 1:ntime
-    for j = n:-1:1
-      # !(1 <= t - j + 1 <= ntime) && continue
-      k = t - j + 1
-      k <= 0 && (k = 1) # 假设I是前期为I[1]
-      Q[t] += I[k] * uh[j]
-    end
-  end
-  return Q
-end
-
-
-export linear_reservoir, linear_reservoir_uh,
-  linear_reservoir_low,
-  coef_Pm_linear,
-  guess_uh
+export linear_reservoir, linear_reservoir_low

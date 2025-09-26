@@ -1,17 +1,17 @@
-using Test
+using Test, LumpedHydroModels
 
 @testset "linear_reservoir" begin
   nseg = 3
   dt = 1
   K = 3.0
-  param = (; K, dt, n=nseg)
+  param = (; K, dt, nseg)
 
   I = [2300, 2340, 2400, 2480, 2520, 2600, 2700, 2810, 2900, 3010, 3190, 3350, 3600, 4500, 6000, 7000,
-    7520, 8100, 8800, 9300, 9500, 9700, 9700, 9650, 9550, 9430, 9250, 9100, 9070, 9000]
+    7520, 8100, 8800, 9300, 9500, 9700, 9700, 9650, 9550, 9430, 9250, 9100, 9070, 9000.]
 
   uh = guess_uh(10; param, atol=0.01)[end]
   # Q_test = conv_uh(I, uh)[:, end]
-  Q_test = linear_reservoir_uh(I; K, dt, nseg, n_uh=30)
+  Q_test = linear_reservoir_uh(I; K, dt, nseg, τ_max=30)
   Q_true = linear_reservoir_low(I; K, dt)[:, end]
   @test of_RMSE(Q_true, Q_test) < 20
 
