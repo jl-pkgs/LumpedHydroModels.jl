@@ -22,8 +22,10 @@ export XAJ, StateXAJ, OutputsXAJ, run_XAJ
   CS::FT = 0.7 | (0.01, 0.9) | "-"      # 汇流参数
   CI::FT = 0.7 | (0.5, 0.99) | "-"      # 壤中流，线性水库汇流参数
   CG::FT = 0.98 | (0.95, 0.998) | "-"   # 地下径流，线性水库汇流参数
-end
 
+  routing::AbstractRouting{FT} = RoutingVoid{FT}()
+end
+# XAJ() = XAJ{Float64}()
 
 @with_kw mutable struct StateXAJ{FT} <: AbstractHydroState{FT}
   ET::FT = 0.0
@@ -48,18 +50,18 @@ end
 
 @with_kw mutable struct OutputsXAJ{FT} <: AbstractHydroOutputs{FT}
   ntime::Int = 100
-  
+
   ET::Vector{FT} = zeros(FT, ntime)
   EU::Vector{FT} = zeros(FT, ntime)
   EL::Vector{FT} = zeros(FT, ntime)
   ED::Vector{FT} = zeros(FT, ntime)
   PE::Vector{FT} = zeros(FT, ntime)    # 净雨, P - ET
-  
+
   WU::Vector{FT} = zeros(FT, ntime)
   WL::Vector{FT} = zeros(FT, ntime)
   WD::Vector{FT} = zeros(FT, ntime)
   W::Vector{FT} = zeros(FT, ntime)
-  
+
   FR::Vector{FT} = zeros(FT, ntime)    # 透水界面径流
   R::Vector{FT} = zeros(FT, ntime)     # 透水界面径流
   R_IM::Vector{FT} = zeros(FT, ntime)  # 不透水界面径流

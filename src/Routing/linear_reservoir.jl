@@ -106,5 +106,3 @@ export linear_reservoir, linear_reservoir_uh,
   linear_reservoir_low,
   coef_Pm_linear,
   guess_uh
-
-

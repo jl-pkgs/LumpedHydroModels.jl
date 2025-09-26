@@ -1,18 +1,20 @@
-import DataFrames: DataFrame
 export ModelNetwork
 export to_mat, DataFrame;
 
+export RoutingVoid
+
 abstract type AbstractHydroModel{FT} <: AbstractModel{FT} end
+abstract type AbstractRouting{FT} <: AbstractModel{FT} end
 abstract type AbstractHydroState{FT} <: AbstractModel{FT} end
 abstract type AbstractHydroOutputs{FT} <: AbstractModel{FT} end
 
+struct RoutingVoid{FT} <: AbstractRouting{FT} end
 
 @with_kw mutable struct ModelNetwork{FT} <: AbstractHydroModel{FT}
   models::Vector{AbstractHydroModel{FT}}
   # routing::Vector      # 汇流参数
   # info_node::DataFrame # 河道节点
 end
-
 
 function Base.getindex(x::AbstractHydroState, names::Vector{Symbol})
   [getfield(x, name) for name in names]

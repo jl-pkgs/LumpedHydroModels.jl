@@ -1,6 +1,6 @@
 @testset "ModelParams update!" begin
   FT = Float64
-  model = ModelNetwork{FT}(; models=[XAJ(), XAJ()])
+  model = ModelNetwork{FT}(; models=[XAJ{FT}(), XAJ{FT}()])
 
   params = Params(model)
   paths = [

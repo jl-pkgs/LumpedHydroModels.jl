@@ -3,7 +3,7 @@ module LumpedHydroModels
 export Params
 using Parameters
 using SpecialFunctions: gamma
-using DataFrames: DataFrame
+import DataFrames: DataFrame
 
 # 2.5x faster power method
 "Faster method for exponentiation"
