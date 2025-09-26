@@ -11,8 +11,8 @@ import DataFrames: DataFrame
 
 include("Parameters.jl")
 include("DataType.jl")
-include("Routing/linear_reservoir.jl")
-include("Routing/uh_gamma.jl")
+include("macro.jl")
+include("Routing/Routing.jl")
 
 include("ultilize.jl")
 include("XAJ_model.jl")

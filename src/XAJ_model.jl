@@ -47,31 +47,7 @@ end
   RG::FT = 0.0
   S::FT = 0.0     # 自由水蓄量
 end
-
-@with_kw mutable struct OutputsXAJ{FT} <: AbstractHydroOutputs{FT}
-  ntime::Int = 100
-
-  ET::Vector{FT} = zeros(FT, ntime)
-  EU::Vector{FT} = zeros(FT, ntime)
-  EL::Vector{FT} = zeros(FT, ntime)
-  ED::Vector{FT} = zeros(FT, ntime)
-  PE::Vector{FT} = zeros(FT, ntime)    # 净雨, P - ET
-
-  WU::Vector{FT} = zeros(FT, ntime)
-  WL::Vector{FT} = zeros(FT, ntime)
-  WD::Vector{FT} = zeros(FT, ntime)
-  W::Vector{FT} = zeros(FT, ntime)
-
-  FR::Vector{FT} = zeros(FT, ntime)    # 透水界面径流
-  R::Vector{FT} = zeros(FT, ntime)     # 透水界面径流
-  R_IM::Vector{FT} = zeros(FT, ntime)  # 不透水界面径流
-  RS::Vector{FT} = zeros(FT, ntime)
-  RI::Vector{FT} = zeros(FT, ntime)
-  RG::Vector{FT} = zeros(FT, ntime)
-  Rsim::Vector{FT} = zeros(FT, ntime)
-  S::Vector{FT} = zeros(FT, ntime)     # 自由水蓄量
-end
-
+@DefOutputs StateXAJ Rsim
 
 
 function run_XAJ(P::Vector{T}, PET::Vector{T}; param::XAJ{T}, state=nothing) where {T<:Real}

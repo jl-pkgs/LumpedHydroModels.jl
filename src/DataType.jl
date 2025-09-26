@@ -11,6 +11,7 @@ abstract type AbstractHydroOutputs{FT} <: AbstractModel{FT} end
 struct RoutingVoid{FT} <: AbstractRouting{FT} end
 
 @with_kw mutable struct ModelNetwork{FT} <: AbstractHydroModel{FT}
+  nbasin::Int = 3
   models::Vector{AbstractHydroModel{FT}}
   # routing::Vector      # 汇流参数
   # info_node::DataFrame # 河道节点

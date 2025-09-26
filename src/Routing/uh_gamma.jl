@@ -13,7 +13,7 @@ function uh_gamma(; α::T=2.5, θ::T=1.0) where {T<:Real}
       uh = map(τ -> _uh_gamma(τ; α, θ), 0:τ_max)
       1 - sum(uh)
     end, 6:24)
-  DataFrame(τ_max=6:24, e)
+  DataFrame(; τ_max=6:24, e)
 end
 
 
