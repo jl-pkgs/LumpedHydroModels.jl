@@ -39,7 +39,7 @@ function UpdateW(P::T, state::StateXAJ; param::XAJ) where {T<:Real}
   (; R, WU, WL, WD, ET) = state
   (; WUM, WLM, WDM) = param
 
-  Δ = P - R - ET
+  Δ = P - ET - R
   WU += Δ
 
   if WU > WUM # 供水充足

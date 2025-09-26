@@ -13,7 +13,8 @@
 """
 function Evapotranspiration!(P::T, PET::T, state::StateXAJ{T}; param::XAJ{T}) where {T<:Real}
   (; WL, WU) = state
-  (; C, WLM) = param
+  (; K, C, WLM) = param
+  PET = PET * K
 
   EU, EL, ED = T(0)
   # Eqs. 2-28，三层蒸发模式
@@ -45,9 +46,10 @@ end
 - `WM` : 流域平均蓄水容量 = um+lm+dm (mm)
 - `W`  : 流域初始土壤含水量 = wu0+wl0+wd0 (mm)
 """
-function Runoff(PE::T, WM, state::StateXAJ{T}; param::XAJ{T}) where {T<:Real}
-  (; B, IM) = param
+function Runoff(state::StateXAJ{T}; param::XAJ{T}) where {T<:Real}
+  (; B, IM, WUM, WLM, WDM) = param
   (; W) = state
+  WM = WUM + WLM + WDM
 
   WMM = WM * (1 .+ B) # 流域平均含水量W与最大储水量的关系, Eq. 2-54
   a = WMM * (1 - (1 - W / WM)^(1 / (1 + B))) # Eq. 2-58
@@ -72,7 +74,7 @@ end
 
 function Runoff_divide3S(state::StateXAJ{T}, FR1::T; param::XAJ{T}) where {T<:Real}
   (; SM, EX, KI, KG) = param
-  (; PE, R, FR) = state # 在计算R时，FR已经进行了更新
+  (; PE, R, R_IM, FR) = state # 在计算R时，FR已经进行了更新
   S1 = state.S # 上一时刻
 
   # FR = PE / R
@@ -92,7 +94,7 @@ function Runoff_divide3S(state::StateXAJ{T}, FR1::T; param::XAJ{T}) where {T<:Re
         S = SM
       end
     end
-
+    RS = RS + R_IM # 不透水界面加到RS
     RI = KI * S * FR
     RG = KG * S * FR
     S = S * (1 - KI - KG)
