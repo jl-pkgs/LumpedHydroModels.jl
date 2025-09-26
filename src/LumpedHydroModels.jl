@@ -16,7 +16,6 @@ include("Routing/Routing.jl")
 
 include("ultilize.jl")
 include("XAJ_model.jl")
-include("XAJ_module.jl")
 include("XAJ_UpdateW.jl")
 
 export XAJ
