@@ -11,12 +11,12 @@
 - `WU`  : 上层土壤初始含水量 (mm)
 - `WL`  : 下层土壤初始含水量 (mm)
 """
-function Evapotranspiration!(P::T, PET::T, state::StateXAJ{T}; param::XAJ{T}) where {T<:Real}
+function Evapotranspiration!(state::StateXAJ{T}, P::T, PET::T; param::XAJ{T}) where {T<:Real}
   (; WL, WU) = state
   (; K, C, WLM) = param
   PET = PET * K
 
-  EU, EL, ED = T(0)
+  EU = EL = ED = T(0)
   # Eqs. 2-28，三层蒸发模式
   if WU + P >= PET
     EU = PET
@@ -48,13 +48,13 @@ end
 """
 function Runoff(state::StateXAJ{T}; param::XAJ{T}) where {T<:Real}
   (; B, IM, WUM, WLM, WDM) = param
-  (; W) = state
+  (; W, PE) = state
   WM = WUM + WLM + WDM
 
   WMM = WM * (1 .+ B) # 流域平均含水量W与最大储水量的关系, Eq. 2-54
   a = WMM * (1 - (1 - W / WM)^(1 / (1 + B))) # Eq. 2-58
 
-  FR = 1 - (1 - a / WMM)^b # 2-55，产流面积α0
+  FR = 1 - (1 - a / WMM)^B # 2-55，产流面积α0
   R = T(0)
   if PE > 0
     if PE + a < WMM
@@ -78,8 +78,9 @@ function Runoff_divide3S(state::StateXAJ{T}, FR1::T; param::XAJ{T}) where {T<:Re
   S1 = state.S # 上一时刻
 
   # FR = PE / R
+  RS = RI = RG = T(0.0)
   if FR == 0
-    RS, RI, RG, S = 0.0
+    S = T(0.0)
   else
     SMM = SM * (1 + EX)
     S = S1 * FR1 / FR # 产流面积上的平均自由水蓄量

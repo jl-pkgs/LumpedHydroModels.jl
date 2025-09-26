@@ -1,5 +1,5 @@
 # 土壤蓄水量更新, TODO 存在另一种写法
-function UpdateW_Zhong!(P::T, state::StateXAJ; param::XAJ) where {T<:Real}
+function UpdateW_Zhong!(state::StateXAJ, P::T; param::XAJ) where {T<:Real}
   (; R, WU, WL, WD, EU, EL, ED) = state
   (; WUM, WLM, WDM) = param
 
@@ -35,13 +35,12 @@ end
 
 
 # 书上的做法
-function UpdateW(P::T, state::StateXAJ; param::XAJ) where {T<:Real}
+function UpdateW(state::StateXAJ, P::T; param::XAJ) where {T<:Real}
   (; R, WU, WL, WD, ET) = state
   (; WUM, WLM, WDM) = param
 
   Δ = P - ET - R
   WU += Δ
-
   if WU > WUM # 供水充足
     WL += WU - WUM
     WU = WUM
@@ -53,7 +52,7 @@ function UpdateW(P::T, state::StateXAJ; param::XAJ) where {T<:Real}
   end
 
   if WU < 0 # 供水不足
-    WL += WL
+    WL += WU
     WU = 0.0
 
     if WL < 0
