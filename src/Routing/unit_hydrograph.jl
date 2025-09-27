@@ -26,8 +26,13 @@ end
 
 
 # 用于山坡汇流
-function uh_gamma(τ::Real; α::T=2.5, θ::T=1.0) where {T<:Real}
+function uh_gamma(τ::Real; α::T=2.5, θ::T=1.0)::T where {T<:Real}
   1 / (gamma(α) * θ^α) * τ^(α - 1) * exp(-τ / θ)
+end
+
+function normalize_uh(uh::Vector{T}) where {T<:Real}
+  S::T = sum(uh)
+  uh ./ S
 end
 
 # function uh_gamma(; α::T=2.5, θ::T=1.0) where {T<:Real}

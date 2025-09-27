@@ -3,6 +3,7 @@ module LumpedHydroModels
 export Params
 using Parameters
 using SpecialFunctions: gamma
+import FieldMetadata: @bounds, bounds, @units, units
 import DataFrames: DataFrame
 
 # 2.5x faster power method
@@ -19,5 +20,6 @@ include("XAJ_model.jl")
 include("XAJ_UpdateW.jl")
 
 export XAJ
+export GammaUH, LinearReservoirRouting, MultiRouting
 
 end # module LumpedHydroModels

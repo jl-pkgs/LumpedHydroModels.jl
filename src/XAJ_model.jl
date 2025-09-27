@@ -19,11 +19,12 @@ export XAJ, StateXAJ, OutputsXAJ, run_XAJ
   KI::FT = 0.3 | (0.01, 0.7) | "-"      # 壤中流出流系数
   KG::FT = 0.3 | (0.01, 0.7) | "-"      # 地下水出流系数
 
-  CS::FT = 0.7 | (0.01, 0.9) | "-"      # 汇流参数
-  CI::FT = 0.7 | (0.5, 0.99) | "-"      # 壤中流，线性水库汇流参数
-  CG::FT = 0.98 | (0.95, 0.998) | "-"   # 地下径流，线性水库汇流参数
-
-  routing::AbstractRouting{FT} = RoutingVoid{FT}()
+  # routing::AbstractRouting{FT} = RoutingVoid{FT}()
+  routing::MultiRouting{FT} = MultiRouting{FT}(
+    RS=GammaUH{FT}(),                # 伽马单位线
+    RI=LinearReservoirSM{FT}(), # 线性水库, 使用 CI 初始值
+    RG=LinearReservoirGW{FT}()  # 线性水库, 使用 CG 初始值
+  )
 end
 # XAJ() = XAJ{Float64}()
 
@@ -55,7 +56,7 @@ function run_XAJ(P::Vector{T}, PET::Vector{T}; param::XAJ{T}, state=nothing) whe
   output = OutputsXAJ{T}(; ntime)
   (; RS, RI, RG, FR) = output
 
-  isnothing(state) && (state = StateXAJ{FT}())
+  isnothing(state) && (state = StateXAJ{T}())
 
   for t = 1:ntime
     _P = P[t]
@@ -69,12 +70,12 @@ function run_XAJ(P::Vector{T}, PET::Vector{T}; param::XAJ{T}, state=nothing) whe
     Runoff_divide3S!(state, FR1; param)          # RS, RI, RG, S
     output[t] = state
   end
-  output.Rsim = RS + RI + RG
+
+  Rsim = route_flow(param.routing, RS, RI, RG) # 假设 dt=1 个时间步
+  output.Rsim = Rsim
   output |> DataFrame
 end
 
-
-# https://github.com/OuyangWenyu/hydromodel/blob/11d9b7a0a6faa01e8a9d01dc7f296073e6a7f702/hydromodel/models/xaj.py
 
 """
 三层蒸发模型计算
@@ -127,8 +128,20 @@ function Runoff!(state::StateXAJ{T}; param::XAJ{T}) where {T<:Real}
   (; W, PE) = state
   WM = WUM + WLM + WDM
 
-  WMM = WM * (1 .+ B) # 流域平均含水量W与最大储水量的关系, Eq. 2-54
-  a = WMM * (1 - (1 - W / WM)^(1 / (1 + B))) # Eq. 2-58
+  # 保护性代码，防止 (1 - W / WM) 为负
+  # 使用 eps(T) 作为机器精度，或一个很小的数如 1e-10
+  # 确保 W/WM 不超过 1.0
+  ratio_WM = W / WM
+  if ratio_WM > 1.0
+    @warn "W > WM in Runoff! (W=$(W), WM=$(WM)), setting ratio_WM = 1.0 - eps(T). This might indicate an issue in UpdateW! or initial conditions."
+    ratio_WM = 1.0 - eps(T)
+  elseif ratio_WM < 0.0
+    @warn "W < 0 in Runoff! (W=$(W)), setting ratio_WM = 0.0. This might indicate an issue in UpdateW! or initial conditions."
+    ratio_WM = 0.0
+  end
+
+  WMM = WM * (1 + B) # 流域平均含水量W与最大储水量的关系, Eq. 2-54
+  a = WMM * (1 - (1 - ratio_WM)^(1 / (1 + B))) # Eq. 2-58
 
   FR = 1 - (1 - a / WMM)^B # 2-55，产流面积α0
   R = T(0)
